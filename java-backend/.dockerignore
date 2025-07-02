@@ -1,0 +1,30 @@
+# IntelliJ, VSCode, Eclipse, NetBeans IDE settings
+.idea/
+.vscode/
+*.iml
+
+# Maven build files
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment & credential files
+.env
+*.env
+
+# OS swap, temp, log
+*.swp
+*.swo
+*.tmp
+*.log
+
+# Git
+.git/
+.gitignore
+
+# Other node or unrelated project folders (if you ever accidentally copy the root)
+node_modules/
+node-order-consumer/

@@ -1,0 +1,17 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+
+# IDEs and editors
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+
+# Env files
+.env
