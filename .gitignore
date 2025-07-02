@@ -1,0 +1,15 @@
+# Mac/Windows system files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+
+# Node and Java modules (catch if someone runs stuff here by mistake)
+node_modules/
+target/
