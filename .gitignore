@@ -1,6 +1,12 @@
+docker-compose.yml
+docker-compose*.yml
+
 # Mac/Windows system files
 .DS_Store
 Thumbs.db
+
+# .env
+.env
 
 # IDEs and editors
 .idea/
