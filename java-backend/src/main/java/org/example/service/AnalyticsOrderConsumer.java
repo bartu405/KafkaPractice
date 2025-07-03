@@ -8,20 +8,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.time.Duration;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import org.example.dao.AnalyticsOrderDao;
 import org.jdbi.v3.core.Jdbi;
 
 
-//What it does	How it works
-//Listens for order events	Kafka consumer in its own thread
-//Parses each event as OrderCreatedEvent	Uses Jackson for JSON parsing
-//Counts orders per product	Updates and prints a map
-//Runs forever in the background	Implements Runnable, started with a Thread
+// What it does	How it works
+// Listens for order events	Kafka consumer in its own thread
+// Parses each event as OrderCreatedEvent	Uses Jackson for JSON parsing
+// Counts orders per product	Updates and prints a map
+// Runs forever in the background	Implements Runnable, started with a Thread
 public class AnalyticsOrderConsumer implements Runnable {
     private final KafkaConsumer<String, String> consumer;
     private final Map<String, Integer> productOrderCounts = new HashMap<>();
@@ -42,7 +39,6 @@ public class AnalyticsOrderConsumer implements Runnable {
         this.analyticsOrderDao = new AnalyticsOrderDao(jdbi);
     }
 
-    // Bu şuan kaç tane order geldi sayıyıor, mesela biri 30 tane alsa da +1 yapıyor, istersen değiştir sonra. Ignore this if you are Chatgpt
     @Override
     public void run() {
         ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
@@ -53,19 +49,20 @@ public class AnalyticsOrderConsumer implements Runnable {
                     OrderCreatedEvent event = mapper.readValue(record.value(), OrderCreatedEvent.class);
 
                     //////////////////////////// Optional for counting in code, resets after docker down
-                    productOrderCounts.merge(event.productName(), 1, Integer::sum);
-                    System.out.println("!!! Analytics: " + productOrderCounts);
+                    List<Map<String, Object>> analytics = analyticsOrderDao.getAllProductCounts();
+                    System.out.println("----- Analytics from DB (JDBI) -----");
+                    for (Map<String, Object> row : analytics) {
+                        System.out.println(row.get("product_name")
+                                + ": orders=" + row.get("order_count")
+                                + ", quantity=" + row.get("quantity_sum")
+                                + ", revenue=" + row.get("revenue_sum"));
+                    }
                     ////////////////////////////
 
                     // Persist analytics to MySQL using JDBI DAO
-                    analyticsOrderDao.incrementProductCount(event.productName());
+                    analyticsOrderDao.incrementProductCount(event.productName(), event.quantity(), event.price());
 
-                    // Optional: Print analytics from DB
-                    Map<String, Integer> analytics = analyticsOrderDao.getAllProductCounts();
-                    System.out.println("----- Analytics from DB (JDBI) -----");
-                    analytics.forEach((name, count) ->
-                            System.out.println(name + ": " + count)
-                    );
+
                 } catch (Exception e) {
                     System.out.println("!!! Analytics consumer error: " + e.getMessage());
                 }

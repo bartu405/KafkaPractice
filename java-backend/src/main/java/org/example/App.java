@@ -9,10 +9,7 @@ import org.example.config.Config;
 import io.javalin.Javalin;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
-import org.example.dao.OrderDao;
-import org.example.dao.ProductDao;
-import org.example.dao.SessionDao;
-import org.example.dao.UserDao;
+import org.example.dao.*;
 import org.example.model.Order;
 import org.example.model.Product;
 import org.example.model.User;
@@ -104,9 +101,10 @@ public class App {
         SessionDao sessionDao = new SessionDao(jdbi);
         ProductDao productDao = new ProductDao(jdbi);
         OrderDao orderDao = new OrderDao(jdbi);
+        AnalyticsOrderDao analyticsOrderDao = new AnalyticsOrderDao(jdbi);
         KafkaService kafkaService = new KafkaService();
 
-        Controller cnt = new Controller(userDao, sessionDao, productDao, orderDao, kafkaService);
+        Controller cnt = new Controller(userDao, sessionDao, productDao, orderDao, analyticsOrderDao, kafkaService);
 
 
         // Easier to replace UserDao with MockUserDao in tests:
@@ -152,6 +150,7 @@ public class App {
         app.get("/allProducts", cnt::allProducts);
         app.post("/products", cnt::createProduct);
         app.post("/orders", cnt::createOrder);
+        app.get("/analytics", cnt::getAnalytics);
 
 
 
