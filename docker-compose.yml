@@ -5,10 +5,8 @@ services:
       - "8080:8080"
     environment:
       DB_URL: jdbc:mysql://mysql:3306/kafka
-      DB_USER: root
-      DB_PASSWORD: 123
-      API_KEY: uWpqxW0T9ml1EbYb5J2LR0F9mMbVA6sk
-      API_SECRET: i2qNwaXvjlmhTNTS
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
       mysql:
         condition: service_healthy
