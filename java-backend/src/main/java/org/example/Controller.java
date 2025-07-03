@@ -8,10 +8,7 @@ import io.javalin.http.Cookie;
 import io.javalin.http.SameSite;
 import io.javalin.openapi.*;
 
-import org.example.dao.ProductDao;
-import org.example.dao.SessionDao;
-import org.example.dao.UserDao;
-import org.example.dao.OrderDao;
+import org.example.dao.*;
 
 import org.example.dto.*;
 
@@ -31,13 +28,15 @@ public class Controller {
     private final SessionDao sessionDao;
     private final ProductDao productDao;
     private final OrderDao orderDao;
+    private final AnalyticsOrderDao analyticsOrderDao;
     private final KafkaService kafkaService;
 
-    public Controller(UserDao userDao, SessionDao sessionDao, ProductDao productDao, OrderDao orderDao, KafkaService kafkaService) {
+    public Controller(UserDao userDao, SessionDao sessionDao, ProductDao productDao, OrderDao orderDao, AnalyticsOrderDao analyticsOrderDao, KafkaService kafkaService) {
         this.userDao = userDao;
         this.sessionDao = sessionDao;
         this.productDao = productDao;
         this.orderDao = orderDao;
+        this.analyticsOrderDao = analyticsOrderDao;
         this.kafkaService = kafkaService;
     }
 
@@ -357,6 +356,7 @@ public class Controller {
                     user.username(),
                     purchasedProduct.name(),
                     createdOrder.quantity(),
+                    purchasedProduct.price(),
                     createdOrder.status(),
                     createdOrder.orderDate()
             );
@@ -374,6 +374,28 @@ public class Controller {
             ctx.status(500).json(Map.of("error", "Order creation failed", "details", e.getMessage()));
         }
     }
+
+    @OpenApi(
+            summary = "Get analytics of product order counts",
+            operationId = "getAnalytics",
+            path = "/analytics",
+            methods = HttpMethod.GET,
+            responses = {
+                    @OpenApiResponse(
+                            status = "200",
+                            content = @OpenApiContent(
+                                    from = Map.class, // This will show a "dictionary" in Swagger UI
+                                    type = "application/json"
+                            ),
+                            description = "Returns a map of product names to order counts"
+                    )
+            }
+    )
+    public void getAnalytics(Context ctx) {
+        List<Map<String, Object>> analytics = analyticsOrderDao.getAllProductCounts();
+        ctx.json(analytics);
+    }
+
 
 
 }
